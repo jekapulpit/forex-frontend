@@ -2,6 +2,7 @@ import React from 'react';
 import ForexItem from './ForexItem'
 import ForexGraph from './ForexGraph'
 import '../stylesheets/graphs.scss'
+import { formatDate } from '../helpers/dateHelper';
 
 class ForexElement extends React.Component {
     constructor(props) {
@@ -29,7 +30,7 @@ class ForexElement extends React.Component {
         return {
             ...item,
             changeStatusColor: (firstCall ? 'white' : this.changeStatus(item)),
-            statistics: (firstCall ? [] : this.previousVallet(item.ticker).statistics.concat({ x: Date.now(), y: item.bid }))
+            statistics: (firstCall ? [] : this.previousVallet(item.ticker).statistics.concat({ x: new Date(), y: +item.bid }))
         }
     };
 
@@ -45,7 +46,7 @@ class ForexElement extends React.Component {
     };
 
     previousVallet = (ticker) => {
-        return this.state.forexItems.find((stateItem) => {return ticker === stateItem.ticker})
+        return this.state.forexItems.find((stateItem) => { return ticker === stateItem.ticker })
     };
 
     previousBid = (ticker) => {
@@ -54,12 +55,13 @@ class ForexElement extends React.Component {
 
     getData = (firstCall = false) => {
         return fetch('https://financialmodelingprep.com/api/v3/forex')
-            .then((response) => { return response.json()} )
+            .then((response) => { return response.json() })
             .then((data) => {
                 this.setState({
                     forexItems: data.forexList.map((forexItem) => {
                         return this.forexItemPresenter(forexItem, firstCall)
                     }),
+                    selectedItem: !firstCall && this.state.forexItems[0]
                 });
             })
     };
@@ -67,7 +69,7 @@ class ForexElement extends React.Component {
     componentWillUnmount() {
         clearInterval(this.state.apiWorker);
         this.setState({
-            apiWorker: null
+            apiWorker: null,
         })
     }
 
