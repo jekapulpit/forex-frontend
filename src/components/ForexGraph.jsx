@@ -8,10 +8,10 @@ const ForexGraph = (stats) => {
     const canvasProps = {
         theme: "light2",
         title: {
-            text: "Comparison of Exchange Rates - 2017"
+            text: ""
         },
         subtitles: [{
-            text: "GBP & USD to INR"
+            text: ""
         }],
         axisY: {
             includeZero: false,
@@ -22,16 +22,15 @@ const ForexGraph = (stats) => {
         data: [
             {
                 type: "area",
-                name: "GBP",
+                name: "",
                 showInLegend: true,
                 xValueFormatString: "HH mm ss",
-                yValueFormatString: "###.####",
+                yValueFormatString: "#.####",
                 dataPoints: !!stats ? stats.stats : []
             }
         ]
-    }
+    };
 
-    console.log(canvasProps.data)
     return (
         <div className="vallet-graphics">
             <div>

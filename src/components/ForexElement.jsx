@@ -2,16 +2,15 @@ import React from 'react';
 import ForexItem from './ForexItem'
 import ForexGraph from './ForexGraph'
 import '../stylesheets/graphs.scss'
-import { formatDate } from '../helpers/dateHelper';
 
 class ForexElement extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            forexItems: [],
-            selectedItem: {
-                statistics: []
-            },
+            forexItems: [
+                { statistics: [] }
+            ],
+            selectedIndex: 0,
             apiWorker: null
         }
     }
@@ -20,8 +19,7 @@ class ForexElement extends React.Component {
         this.getData(true)
             .then(() => {
                 this.setState({
-                    apiWorker: setInterval(this.getData, 1000),
-                    selectedItem: this.state.forexItems[0]
+                    apiWorker: setInterval(this.getData, 5000),
                 })
             });
     }
@@ -29,8 +27,8 @@ class ForexElement extends React.Component {
     forexItemPresenter = (item, firstCall = false) => {
         return {
             ...item,
-            changeStatusColor: (firstCall ? 'white' : this.changeStatus(item)),
-            statistics: (firstCall ? [] : this.previousVallet(item.ticker).statistics.concat({ x: new Date(), y: +item.bid }))
+            changeStatusColor: (firstCall ? 'black' : this.changeStatus(item)),
+            statistics: (firstCall ? [{ x: new Date(), y: +item.bid }] : this.previousVallet(item.ticker).statistics.concat({ x: new Date(), y: +item.bid }))
         }
     };
 
@@ -53,6 +51,12 @@ class ForexElement extends React.Component {
         return this.previousVallet(ticker).bid;
     };
 
+    handleChangeSelected = (index) => {
+        this.setState({
+            selectedIndex: index
+        })
+    };
+
     getData = (firstCall = false) => {
         return fetch('https://financialmodelingprep.com/api/v3/forex')
             .then((response) => { return response.json() })
@@ -61,7 +65,6 @@ class ForexElement extends React.Component {
                     forexItems: data.forexList.map((forexItem) => {
                         return this.forexItemPresenter(forexItem, firstCall)
                     }),
-                    selectedItem: !firstCall && this.state.forexItems[0]
                 });
             })
     };
@@ -74,8 +77,8 @@ class ForexElement extends React.Component {
     }
 
     render() {
-        let forexItems = this.state.forexItems.map((item) => {
-            return <ForexItem item={item} key={item.ticker} />
+        let forexItems = this.state.forexItems.map((item, index) => {
+            return <ForexItem index={index} changeSelectedHandler={this.handleChangeSelected} item={item} key={index} />
         });
 
         return (
@@ -83,7 +86,7 @@ class ForexElement extends React.Component {
                 <div className="vallet-list">
                     {forexItems}
                 </div>
-                <ForexGraph stats={this.state.selectedItem.statistics} />
+                <ForexGraph stats={this.state.forexItems[this.state.selectedIndex].statistics} />
             </React.Fragment>
         )
     }
